@@ -8,3 +8,10 @@
 - Write pytest tests for core business logic.
 - Do not add dependencies unless necessary.
 - Do not implement features without explicit instructions.
+
+## Python Environment
+
+- Use the project's `.venv` virtual environment.
+- Do not install Python packages globally.
+- Keep project dependencies in `pyproject.toml`.
+- Do not commit `.venv` to Git.
