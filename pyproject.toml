@@ -7,6 +7,14 @@ name = "lotto-lab"
 version = "0.1.0"
 description = "Historical Canadian lottery data collection and analysis."
 requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.12,<5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<10",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
