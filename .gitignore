@@ -2,6 +2,8 @@
 __pycache__/
 *.py[codz]
 *$py.class
+*.pyc
+*.pyo
 
 # C extensions
 *.so
@@ -61,6 +63,11 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+
+#Local databases
+.db
+.sqlite
+.sqlite3
 
 # Flask stuff:
 instance/
@@ -159,6 +166,8 @@ ENV/
 env.bak/
 venv.bak/
 .venv/ 
+.env.*
+!.env.example
 
 # Spyder project settings
 .spyderproject
@@ -219,3 +228,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#MacOS system file
+.DS_Store
+
+#Collected and generated data
+data/raw/
+data/processed/
+data/quarantine/
+

@@ -38,10 +38,10 @@ def test_string_value() -> None:
 def test_float_value() -> None:
     assert validate_numbers([1.0, 2, 3, 4, 5, 6]) is False
 
-def test_true_value() -> None:
-    assert validate_numbers([1, 2, 3, 4, 5, 6]) is False
-
 
 @pytest.mark.parametrize("value", [True, False])
 def test_boolean_value(value: bool) -> None:
     assert validate_numbers([value, 2, 3, 4, 5, 6]) is False
+
+
+
