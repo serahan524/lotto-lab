@@ -236,3 +236,91 @@ def test_run_etl_idempotency(tmp_path):
         ).fetchone()[0]
 
     assert count == 2
+
+
+from lotto_lab.orchestration import run_etl_from_url
+
+
+def test_run_etl_from_url(monkeypatch, tmp_path):
+
+    fake_html = "<html>Fake lottery data</html>"
+    expected_result = {"status": "success"}
+
+    def fake_fetch_html(url):
+        assert url == "https://example.com"
+        return fake_html
+
+    def fake_run_etl(html, db_path):
+        assert html == fake_html
+        assert db_path == tmp_path / "lottery.db"
+        return expected_result
+
+    monkeypatch.setattr(
+        "lotto_lab.orchestration.fetch_html",
+        fake_fetch_html
+    )
+
+    monkeypatch.setattr(
+        "lotto_lab.orchestration.run_etl",
+        fake_run_etl
+    )
+
+    result = run_etl_from_url(
+        "https://example.com",
+        tmp_path / "lottery.db"
+    )
+
+    assert result == expected_result
+
+
+    import sqlite3
+from pathlib import Path
+
+
+def test_run_etl_from_url_integration(monkeypatch, tmp_path):
+    fixture_path = (
+        Path(__file__).parent
+        / "fixtures"
+        / "western_649_sample.html"
+    )
+
+    fake_html = fixture_path.read_text(encoding="utf-8")
+    db_path = tmp_path / "lottery.db"
+
+    def fake_fetch_html(url):
+        assert url == "https://example.com"
+        return fake_html
+
+    monkeypatch.setattr(
+        "lotto_lab.orchestration.fetch_html",
+        fake_fetch_html
+    )
+
+    result = run_etl_from_url(
+        "https://example.com",
+        db_path
+    )
+
+    assert result["storage"]["inserted"] == 2
+
+    with sqlite3.connect(db_path) as conn:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM lottery_draws"
+        ).fetchone()[0]
+
+    assert count == 2
+
+    second_result = run_etl_from_url(
+        "https://example.com",
+        db_path
+    )
+
+    assert second_result["storage"]["inserted"] == 0
+    assert second_result["storage"]["skipped"] == 2
+
+    with sqlite3.connect(db_path) as conn:
+        count_after_second_run = conn.execute(
+            "SELECT COUNT(*) FROM lottery_draws"
+        ).fetchone()[0]
+
+    assert count_after_second_run == 2

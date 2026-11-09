@@ -3,6 +3,7 @@ from pathlib import Path
 from lotto_lab.storage.sqlite_storage import insert_draw
 from lotto_lab.storage.sqlite_storage import initialize_database
 from lotto_lab.pipeline import process_draws
+from lotto_lab.fetcher import fetch_html
 
 
 def save_draws(db_path: str | Path, draws: list[dict]) -> dict:
@@ -35,3 +36,10 @@ def run_etl(html: str, db_path: str | Path) -> dict:
             "storage": save_result
         }
 
+
+def run_etl_from_url(url: str, db_path: str | Path) -> dict:
+    html = fetch_html(url)
+
+    result = run_etl(html, db_path)
+
+    return result
