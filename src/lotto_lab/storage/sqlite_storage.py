@@ -83,3 +83,13 @@ def insert_draw(db_path: str | Path, draw: dict) -> str:
                 return "skipped"
             
             return "conflict"
+
+
+def get_all_draws(db_path):
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT * FROM lottery_draws"
+        ).fetchall()
+
+    return [dict(row) for row in rows]

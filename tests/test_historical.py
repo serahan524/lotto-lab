@@ -32,7 +32,7 @@ def test_collect_history_continues_after_failure(tmp_path):
     with (
         patch("lotto_lab.historical.fetch_html") as mock_fetch,
         patch("lotto_lab.historical.process_draws") as mock_process,
-        patch("lotto_lab.historical.save_draws", wraps=save_draws) as mock_save
+        patch("lotto_lab.historical.save_draws", wraps=track_save) as mock_save
     ):
         mock_fetch.side_effect = [
             ValueError("Simulated fetch failure"),
@@ -79,6 +79,12 @@ def test_collect_history_continues_after_failure(tmp_path):
 
     assert first_count == 1
     assert second_count == 1
+
+    assert len(storage_results) == 2
+    assert storage_results[0]["inserted"] == 1
+    assert storage_results[1]["skipped"] == 1
+    assert storage_results[1]["conflict"] == 0
+    assert storage_results[1]["error"] == 0
 
     with sqlite3.connect(db_path) as conn:
         row = conn.execute(
