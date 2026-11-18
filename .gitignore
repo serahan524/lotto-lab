@@ -58,6 +58,9 @@ cover/
 *.mo
 *.pot
 
+# Raw lottery data
+data/raw/
+
 # Local SQLite databases
 *.db
 *.db-journal
