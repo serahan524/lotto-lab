@@ -1,13 +1,17 @@
 import re
+import copy
 
 from lotto_lab.pdf_importer import (
     extract_pdf_text,
     parse_draw_line,
-    parse_pdf_text
+    parse_pdf_text,
+    save_pdf_draws,
+    reconcile_draws
 )
 from lotto_lab.storage.sqlite_storage import (
     initialize_database,
     insert_draw,
+    get_all_draws
 )
 
 # check what the pdf file looks like
@@ -149,6 +153,7 @@ print("Duplicate count:", len(dates) - len(unique_dates))
 """
 
 #what would be valid draw? 
+"""
 pdf_path = "data/raw/WESTERN 649 Since Inception.pdf"
 
 text = extract_pdf_text(pdf_path)
@@ -164,3 +169,54 @@ draw = valid_draws[0]
 result = insert_draw(db_path, draw)
 
 print("Insert result:", result)
+"""
+
+# test save_pdf_draws()
+
+pdf_path = "data/raw/WESTERN 649 Since Inception.pdf"
+
+text = extract_pdf_text(pdf_path)
+result = parse_pdf_text(text)
+
+valid_draws = result["valid_draws"]
+db_path = "data/lotto_pdf_test.db"
+
+counts = save_pdf_draws(db_path, valid_draws)
+
+print("Save results:", counts)
+
+
+# check if the data exist in database
+
+saved_draws = get_all_draws(db_path)
+
+print("Total saved draws:", len(saved_draws))
+print("Expected draws:", len(valid_draws))
+print("Counts match:", len(saved_draws) == len(valid_draws))
+
+
+# check reconcile_draws() 
+
+valid_draws = result["valid_draws"]
+db_path = "data/lotto_pdf_test.db"
+mismatches = reconcile_draws(valid_draws, saved_draws)
+
+print("Mismatches:", len(mismatches))
+print("Mismatch dates:", mismatches[:10])
+
+# negative test - wrong data
+test_db_draws = copy.deepcopy(saved_draws)
+
+test_db_draws[0]["n1"] = 49
+test_mismatches = reconcile_draws(valid_draws, test_db_draws)
+
+print("Test mismatches:", len(test_mismatches))
+print("Test mismatch dates:", test_mismatches)
+
+# negative test - when data on certain date is missing
+test_missing_draws = saved_draws[1:]
+
+missing_results = reconcile_draws(valid_draws, test_missing_draws)
+
+print("Missing count:", len(missing_results))
+print("Missing details:", missing_results[:3])
